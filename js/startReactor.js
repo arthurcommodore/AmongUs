@@ -66,12 +66,84 @@ const startReactor = {
                     memPanel.classList.remove(`memoryActive`)
                 }, 150)
             })
-        }
-       
+        },
+        enableButtons() {
+            const playerMemory = startReactor.interface.playerMemory
+            playerMemory.classList.add(`playerActive`)
 
+            Array(playerMemory.children.length).fill().map((_,i) => {
+                if(playerMemory.children[i].tagName === `DIV`)
+                    playerMemory.children[i].classList.add(`playerMemoryActive`)
+            })
+        },
+        
+        disableButtons() {
+            const playerMemory = startReactor.interface.playerMemory
+            playerMemory.classList.remove(`playerActive`)
+
+            Array(playerMemory.children.length).map((_, i) => {
+                if(playerMemory.children[i].tagName === `DIV`)
+                    playerMemory.children.classList.remove(`playerMemoryActive`)
+            })
+        },
+        endGame(type = `fail`) {
+            const memPanel = startReactor.interface.memoryPanel
+            const ledPanel = startReactor.interface.computerPanel
+            const audio = (type === `complete`) ? startReactor.audio.complete : startReactor.audio.fail
+            const typeClasses = (type == "complete") ? ["playerMemoryComplete", "playerLedComplete"] : ["playerMemoryError", "playerLedError"]
+
+            startReactor.interface.disableButtons()
+            startReactor.interface.turnAllLeds()
+
+            audio.play().then(() => {
+                Array(memPanel.children.length).fill().map((_, i) => {
+                    if(memPanel.children[i].tagName === `DIV`)
+                        memPanel.children[i].classList.add(typeClasses[0])
+                })
+
+                Array(ledPanel.children.length).fill().map((_, i) => {
+                    if(memPanel.children[i].tagName === `DIV`)
+                    ledPanel.children[i].classList.add(typeClasses[0])
+                })
+
+                setTimeout(() => {
+                    Array(memPane.children.length).fill().map((_, i) => {
+                        if(memPanel.children[i].tagName === `DIV`)
+                            memPanel.children[i].classList.add(typeClasses[1])
+                    })
+    
+                    
+    
+                    Array(ledPanel.children.length).fill().map((_, i) => {
+                        if(memPanel.children[i].tagName === `DIV`)
+                        ledPanel.children[i].classList.add(typeClasses[1])
+                    })
+                }, 900)
+            })
+        }
     },
 
-    load() {},
+    load() {
+        return new Promise(resolve => {
+            startReactor.audio.loadAudio()
+
+            const playerMemory = startReactor.interface.playerMemory
+            const memory = startReactor.interface.playerMemoryButtons
+
+            Array(memory.length).fill().map((elem, i) => {
+                elem.addEventListener(`click`, () => {
+                    if(playerMemory.classList.contains(`playerActive`)) {
+                        startReactor.play(parseInt(elem.dataset.memory))
+
+                        elem.style.animation = `playermemoryClick .4s`
+                        setTimeout(() => elem.style.animation = ``, 400)
+                    }
+                })
+            })
+        })
+
+
+    },
     start() {
         startReactor.createCombination = startReactor.createCombination()
         startReactor.computerCombinationPosition = 1
